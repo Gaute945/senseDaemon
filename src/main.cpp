@@ -1,8 +1,8 @@
 #include <WiFi.h> // WiFi library for ESP32
 
 // Replace with your network credentials
-const char* ssid = "Josh";
-const char* password = "gautegaute";
+const char* ssid = "VLFK-IoT";
+const char* password = "jn4GTy11hA";
 
 void setup() {
   Serial.begin(9600);
