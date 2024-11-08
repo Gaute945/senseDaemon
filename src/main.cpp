@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BMP280.h>
@@ -23,6 +24,7 @@ void setup() {
 }
 
 void loop() {
+  Serial.println("Could not find a valid BMP280 sensor, check wiring!");
   Serial.print("Temperature = ");
   Serial.print(bmp.readTemperature());
   Serial.println(" °C");
