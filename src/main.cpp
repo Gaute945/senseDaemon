@@ -1,42 +1,34 @@
 #include <Arduino.h>
-#include <Wire.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BMP280.h>
 
-// Create an instance of the sensor
-Adafruit_BMP280 bmp; // I2C interface by default
+// Define the analog pin connected to the GUVA-S12SD
+const int uvSensorPin = A0;  // Use GPIO 34 or any other ADC pin on the ESP32
+
+const float calibrationFactor = 307.0; // Approximate μW/cm² per V for GUVA-S12SD
 
 void setup() {
-  Serial.begin(9600);
-  
-  // Initialize the BMP280
-  if (!bmp.begin(0x77)) {  // Check the I2C address (0x76 or 0x77)
-    Serial.println("Could not find a valid BMP280 sensor, check wiring!");
-    while (1);
-  }
-
-  // Optional: set the precision and mode
-  bmp.setSampling(Adafruit_BMP280::MODE_NORMAL, 
-                  Adafruit_BMP280::SAMPLING_X2,  // Temperature oversampling
-                  Adafruit_BMP280::SAMPLING_X16, // Pressure oversampling
-                  Adafruit_BMP280::FILTER_X16,   // Filtering
-                  Adafruit_BMP280::STANDBY_MS_500); // Standby time
+  Serial.begin(9600);  // ESP32 default is 115200 baud
 }
 
 void loop() {
-  Serial.println("Could not find a valid BMP280 sensor, check wiring!");
-  Serial.print("Temperature = ");
-  Serial.print(bmp.readTemperature());
-  Serial.println(" °C");
+  // Read the analog value from the sensor (0-4095 for 3.3V on ESP32)
+  int sensorValue = analogRead(uvSensorPin);
+  digitalWrite(4, HIGH);
 
-  Serial.print("Pressure = ");
-  Serial.print(bmp.readPressure() / 100.0F); // Convert to hPa
-  Serial.println(" hPa");
+  // Convert the analog value to voltage
+  float sensorVoltage = sensorValue * (3.3 / 4095.0);  // ESP32 ADC is 12-bit (0-4095)
 
-  Serial.print("Approx. Altitude = ");
-  Serial.print(bmp.readAltitude(1021)); // Set baseline sea-level pressure for accuracy
-  Serial.println(" m");
+  // Calculate UV intensity in μW/cm²
+  float uvIntensity = sensorVoltage * calibrationFactor;
 
-  Serial.println();
-  delay(2000);
+  // Print the results
+  Serial.print("Sensor Value: ");
+  Serial.print(sensorValue);
+  Serial.print(" | Voltage: ");
+  Serial.print(sensorVoltage, 2);
+  Serial.print(" V | UV Intensity: ");
+  Serial.print(uvIntensity, 2);
+  Serial.println(" μW/cm²");
+
+  delay(1000);  // 1 second delay
+  digitalWrite(4, LOW);
 }
