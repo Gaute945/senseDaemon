@@ -1,34 +1,23 @@
 #include <Arduino.h>
 
-// Define the analog pin connected to the GUVA-S12SD
-const int uvSensorPin = A0;  // Use GPIO 34 or any other ADC pin on the ESP32
-
-const float calibrationFactor = 307.0; // Approximate μW/cm² per V for GUVA-S12SD
+#define RAIN_SENSOR_PIN A0  // Analog pin connected to the rain sensor
+#define LED_PIN 13          // Optional: an LED for indicating rain detection
 
 void setup() {
-  Serial.begin(9600);  // ESP32 default is 115200 baud
+  Serial.begin(9600);       // Start serial communication
+  pinMode(LED_PIN, OUTPUT); // Set LED pin as output
 }
 
 void loop() {
-  // Read the analog value from the sensor (0-4095 for 3.3V on ESP32)
-  int sensorValue = analogRead(uvSensorPin);
-  digitalWrite(4, HIGH);
+  int sensorValue = analogRead(RAIN_SENSOR_PIN); // Read analog value from the rain sensor
+  Serial.print("Rain Sensor Value: ");
+  Serial.println(sensorValue);
 
-  // Convert the analog value to voltage
-  float sensorVoltage = sensorValue * (3.3 / 4095.0);  // ESP32 ADC is 12-bit (0-4095)
+  if (sensorValue < 500) {      // Adjust threshold based on your testing
+    digitalWrite(LED_PIN, HIGH); // Turn on LED if rain detected
+  } else {
+    digitalWrite(LED_PIN, LOW);  // Turn off LED otherwise
+  }
 
-  // Calculate UV intensity in μW/cm²
-  float uvIntensity = sensorVoltage * calibrationFactor;
-
-  // Print the results
-  Serial.print("Sensor Value: ");
-  Serial.print(sensorValue);
-  Serial.print(" | Voltage: ");
-  Serial.print(sensorVoltage, 2);
-  Serial.print(" V | UV Intensity: ");
-  Serial.print(uvIntensity, 2);
-  Serial.println(" μW/cm²");
-
-  delay(1000);  // 1 second delay
-  digitalWrite(4, LOW);
+  delay(1000); // Wait 1 second before repeating
 }
