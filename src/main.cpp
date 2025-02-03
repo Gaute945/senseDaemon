@@ -18,8 +18,11 @@ float pressure = 0.0;
 float humidity = 0.0;
 int rainSensor = 0;
 int uvReading = 0;
-int uvIndex = 0;
 bool rain = false;
+const float REF_VOLTAGE = 3.3; // 3.3V
+const int ADC_RESOLUTION = 4095; // 12-bit ADC (ESP32)
+const float UV_SENSITIVITY = 0.1; // 0.1 V per (mW/cm²)
+float uvIndex = 0.0;
 
 void setup() {
   Serial.begin(9600);
@@ -54,7 +57,16 @@ void printSensors() {
     Serial.println(uvIndex);
     Serial.print("\n");
     Serial.print("\n");
-  }
+}
+
+float calculateUVIndex() {
+  int rawValue = analogRead(UV_PIN); 
+  float voltage = (rawValue * REF_VOLTAGE) / ADC_RESOLUTION;
+  float uvIntensity = voltage / UV_SENSITIVITY; // Convert to mW/cm²
+  float uvIndex = uvIntensity * 0.1; // Approximate conversion to UV Index
+    
+  return uvIndex;
+}
 
 void loop() {
   // diagnose light
@@ -66,11 +78,7 @@ void loop() {
   
   // rain sensor
   rainSensor = analogRead(RAIN_PIN);
-  if (rainSensor < 3500) {
-    rain = true;
-  } else {
-    rain = false;
-  }
+  rain = (rainSensor < 3500);
   
   // dht11
   humidity = dht11.readHumidity();
@@ -81,10 +89,8 @@ void loop() {
 
   // UV
   uvReading = analogRead(UV_PIN);
-  uvIndex = uvReading / 0.1;
-
-  // wind speed
+  uvIndex = calculateUVIndex(); // Update UV index
 
   printSensors();  
-  delay(1000); // Wait 1 second before repeating
+  delay(1000);
 }
