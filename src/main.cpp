@@ -4,10 +4,10 @@
 #include "DHT.h"
 
 #define RAIN_PIN A0
-#define LED_PIN 2
+#define LED_PIN D4
 #define SCK_PIN A5 // I2C Clock
 #define SDI_PIN A4 // I2C Data
-#define DHT11_PIN 7
+#define DHT11_PIN D7
 #define UV_PIN A3
 
 Adafruit_BMP280 bmp;
