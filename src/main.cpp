@@ -32,6 +32,7 @@ void setup() {
 
   pinMode(LED_PIN, OUTPUT);
   pinMode(UV_PIN, INPUT);
+  pinMode(RAIN_PIN, INPUT);
 }
 
 void printSensors() {
