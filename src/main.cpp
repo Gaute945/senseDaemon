@@ -4,10 +4,10 @@
 #include "DHT.h"
 
 #define RAIN_PIN A0
-#define LED_PIN D4
+#define LED_PIN 4
 #define SCK_PIN A5 // I2C Clock
 #define SDI_PIN A4 // I2C Data
-#define DHT11_PIN D7
+#define DHT11_PIN 7
 #define UV_PIN A3
 
 Adafruit_BMP280 bmp;
@@ -20,7 +20,6 @@ int rainSensor = 0;
 int uvReading = 0;
 bool rain = false;
 const float REF_VOLTAGE = 3.3; // 3.3V
-const int ADC_RESOLUTION = 4095; // 12-bit ADC (ESP32)
 const float UV_SENSITIVITY = 0.1; // 0.1 V per (mW/cm²)
 float uvIndex = 0.0;
 
@@ -65,7 +64,6 @@ float calculateUVIndex() {
   float voltage = (rawValue * REF_VOLTAGE) / ADC_RESOLUTION;
   float uvIntensity = voltage / UV_SENSITIVITY; // Convert to mW/cm²
   float uvIndex = uvIntensity * 0.1; // Approximate conversion to UV Index
-    
   return uvIndex;
 }
 
