@@ -69,7 +69,7 @@ float calculateUVIndex() {
 
 void loop() {
   // diagnose light
-  if (rainSensor < 3500) {
+  if (rainSensor < 1000) {
     digitalWrite(LED_PIN, HIGH);
   } else {
     digitalWrite(LED_PIN, LOW);
