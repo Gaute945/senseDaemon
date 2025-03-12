@@ -5,8 +5,6 @@
 
 #define RAIN_PIN A0
 #define LED_PIN 4
-#define SCK_PIN A5 // I2C Clock
-#define SDI_PIN A4 // I2C Data
 #define DHT11_PIN 7
 #define UV_PIN A3
 
@@ -25,9 +23,9 @@ float uvIndex = 0.0;
 
 void setup() {
   Serial.begin(9600);
-  Wire.begin(SDI_PIN, SCK_PIN);
-  bmp.begin(0x77);
   dht11.begin();
+  Wire.begin();
+  bmp.begin(0x77);
 
   pinMode(LED_PIN, OUTPUT);
   pinMode(UV_PIN, INPUT);
@@ -61,7 +59,7 @@ void printSensors() {
 
 float calculateUVIndex() {
   int rawValue = analogRead(UV_PIN); 
-  float voltage = (rawValue * REF_VOLTAGE) / ADC_RESOLUTION;
+  float voltage = (rawValue * REF_VOLTAGE) / 1023.0;
   float uvIntensity = voltage / UV_SENSITIVITY; // Convert to mW/cm²
   float uvIndex = uvIntensity * 0.1; // Approximate conversion to UV Index
   return uvIndex;
@@ -77,7 +75,7 @@ void loop() {
   
   // rain sensor
   rainSensor = analogRead(RAIN_PIN);
-  rain = (rainSensor < 3500);
+  rain = (rainSensor < 1000);
   
   // dht11
   humidity = dht11.readHumidity();
