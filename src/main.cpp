@@ -7,7 +7,6 @@
 
 float temperature = 0.0;
 float pressure = 0.0;
-float humidity = 0.0;
 int rainSensor = 0;
 int uvReading = 0;
 bool rain = false;
@@ -32,10 +31,6 @@ void printSensors() {
     Serial.print(pressure);
     Serial.println(F(" hPa"));
 
-    Serial.print("Humidity: ");
-    Serial.print(humidity);
-    Serial.println(F(" %"));
-
     Serial.print("Rain Sensor Value: ");
     Serial.println(rainSensor);
     Serial.print("Is it raining? ");
@@ -58,13 +53,6 @@ float calculateUVIndex() {
 }
 
 void loop() {
-  // diagnose light
-  if (rainSensor < 1000) {
-    digitalWrite(LED_PIN, HIGH);
-  } else {
-    digitalWrite(LED_PIN, LOW);
-  }
-  
   // rain sensor
   rainSensor = analogRead(RAIN_PIN);
   rain = (rainSensor < 1000);
