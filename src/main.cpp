@@ -5,15 +5,12 @@
 
 #define RAIN_PIN A0
 #define LED_PIN 4
-#define DHT11_PIN 7
 #define UV_PIN A3
 
 Adafruit_BMP280 bmp;
-DHT dht11(DHT11_PIN, DHT11);
 
 float temperature = 0.0;
 float pressure = 0.0;
-float humidity = 0.0;
 int rainSensor = 0;
 int uvReading = 0;
 bool rain = false;
@@ -23,7 +20,6 @@ float uvIndex = 0.0;
 
 void setup() {
   Serial.begin(9600);
-  dht11.begin();
   Wire.begin();
   bmp.begin(0x77);
 
@@ -39,10 +35,6 @@ void printSensors() {
     Serial.print(F("Pressure = "));
     Serial.print(pressure);
     Serial.println(F(" hPa"));
-
-    Serial.print("Humidity: ");
-    Serial.print(humidity);
-    Serial.println(F(" %"));
 
     Serial.print("Rain Sensor Value: ");
     Serial.println(rainSensor);
@@ -66,20 +58,10 @@ float calculateUVIndex() {
 }
 
 void loop() {
-  // diagnose light
-  if (rainSensor < 1000) {
-    digitalWrite(LED_PIN, HIGH);
-  } else {
-    digitalWrite(LED_PIN, LOW);
-  }
-  
   // rain sensor
   rainSensor = analogRead(RAIN_PIN);
   rain = (rainSensor < 1000);
-  
-  // dht11
-  humidity = dht11.readHumidity();
-  
+
   // BMP280
   temperature = bmp.readTemperature();
   pressure = bmp.readPressure() / 100;
