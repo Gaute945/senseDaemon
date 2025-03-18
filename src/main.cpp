@@ -1,15 +1,9 @@
 #include <Arduino.h>
-#include <Adafruit_BMP280.h>
-#include <Wire.h>
-#include "DHT.h"
+#include <Arduino_MKRENV.h>
 
 #define RAIN_PIN A0
 #define LED_PIN 4
-#define DHT11_PIN 7
 #define UV_PIN A3
-
-Adafruit_BMP280 bmp;
-DHT dht11(DHT11_PIN, DHT11);
 
 float temperature = 0.0;
 float pressure = 0.0;
@@ -23,9 +17,7 @@ float uvIndex = 0.0;
 
 void setup() {
   Serial.begin(9600);
-  dht11.begin();
-  Wire.begin();
-  bmp.begin(0x77);
+  ENV.begin();
 
   pinMode(LED_PIN, OUTPUT);
   pinMode(UV_PIN, INPUT);
@@ -77,12 +69,10 @@ void loop() {
   rainSensor = analogRead(RAIN_PIN);
   rain = (rainSensor < 1000);
   
-  // dht11
-  humidity = dht11.readHumidity();
-  
-  // BMP280
-  temperature = bmp.readTemperature();
-  pressure = bmp.readPressure() / 100;
+  // shield
+  humidity = ENV.readHumidity();
+  temperature = ENV.readTemperature(CELSIUS);
+  pressure = ENV.readPressure();
 
   // UV
   uvReading = analogRead(UV_PIN);
