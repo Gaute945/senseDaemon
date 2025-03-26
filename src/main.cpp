@@ -1,8 +1,13 @@
 #include <Arduino.h>
 #include <Arduino_MKRENV.h>
+#include <SPI.h>
+// csv = string(string) + "," + string(string)
+#include <SD.h>
+
+#define chipSelect SDCARD_SS_PIN
+File myFile;
 
 #define RAIN_PIN A0
-#define LED_PIN 4
 #define UV_PIN A3
 
 float temperature = 0.0;
@@ -19,9 +24,17 @@ void setup() {
   Serial.begin(9600);
   ENV.begin();
 
-  pinMode(LED_PIN, OUTPUT);
   pinMode(UV_PIN, INPUT);
   pinMode(RAIN_PIN, INPUT);
+
+  if (!SD.begin(chipSelect)) {
+    Serial.println("initialization failed. Things to check:");
+    Serial.println("1. is a card inserted?");
+    Serial.println("2. is your wiring correct?");
+    Serial.println("3. did you change the chipSelect pin to match your shield or module?");
+    Serial.println("Note: press reset button on the board and reopen this Serial Monitor after fixing your issue!");
+    while (true);
+  }
 }
 
 void printSensors() {
