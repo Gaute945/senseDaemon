@@ -4,11 +4,12 @@
 // csv = string(string) + "," + string(string)
 #include <SD.h>
 
-#define chipSelect SDCARD_SS_PIN
-File myFile;
+File dataFile;
 
 #define RAIN_PIN A0
 #define UV_PIN A3
+
+const int SD_CS_PIN = 4;
 
 float temperature = 0.0;
 float pressure = 0.0;
@@ -23,18 +24,27 @@ float uvIndex = 0.0;
 void setup() {
   Serial.begin(9600);
   ENV.begin();
+  SPI.begin();
+  delay(1000);
+
+  //init SD card
+  if(!SD.begin(SD_CS_PIN)) {
+    Serial.println("Failed to initialize SD card!");
+    while (1);
+  }
+
+  //init the logfile
+  File datafile = SD.open("log-0000.csv", FILE_WRITE);
+  delay(1000);
+  
+  //init the CSV file with headers
+  dataFile.println("temperature,humidity,pressure,uv,uvIndex,rain");
+  
+  //close the file
+  datafile.close();
 
   pinMode(UV_PIN, INPUT);
   pinMode(RAIN_PIN, INPUT);
-
-  if (!SD.begin(chipSelect)) {
-    Serial.println("initialization failed. Things to check:");
-    Serial.println("1. is a card inserted?");
-    Serial.println("2. is your wiring correct?");
-    Serial.println("3. did you change the chipSelect pin to match your shield or module?");
-    Serial.println("Note: press reset button on the board and reopen this Serial Monitor after fixing your issue!");
-    while (true);
-  }
 }
 
 void printSensors() {
@@ -71,6 +81,28 @@ float calculateUVIndex() {
 }
 
 void loop() {
+  //init the logfile
+  dataFile = SD.open("log-0000.csv", FILE_WRITE);
+
+  // print each of the sensor values
+  dataFile.print(temperature);
+  dataFile.print(",");
+  dataFile.print(humidity);
+  dataFile.print(",");
+  dataFile.print(pressure);
+  dataFile.print(",");
+  dataFile.print(uvReading);
+  dataFile.print(",");
+  dataFile.print(uvIndex);
+  dataFile.print(",");
+  dataFile.println(rain);
+
+  //close the file
+  dataFile.close();
+
+  //wait 1 sec and print again
+  delay(1000);
+
   // rain sensor
   rainSensor = analogRead(RAIN_PIN);
   rain = (rainSensor < 1000);
