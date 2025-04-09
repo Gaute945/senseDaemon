@@ -48,6 +48,7 @@ void sdLog() {
   myFile = SD.open("sensors.csv", FILE_WRITE);
   if (myFile) {
     // Write CSV header if file is empty
+    // timestap is millis() since the Arduino started
     if (myFile.size() == 0) {
       myFile.println("Timestamp,Temperature,Pressure,Humidity,RainSensor,Rain,UVReading,UVIndex");
     }
