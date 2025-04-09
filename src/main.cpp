@@ -1,29 +1,33 @@
-#include <ArduinoModbus.h>
-#include <ArduinoRS485.h>
+#include <ModbusMaster.h>
 
-#define SENSOR_ADDRESS 1  // Change this if needed
+ModbusMaster node;
 
 void setup() {
-    Serial.begin(115200);
-    while (!Serial);
+  Serial.begin(115200);
+  delay(1000);
 
-    Serial.println("Starting RS485...");
-
-    if (!ModbusRTUClient.begin(9600)) {
-        Serial.println("Failed to start Modbus RTU Client!");
-        while (1);
-    }
+  Serial1.begin(9600);         // Sensor default is usually 9600
+  node.begin(2, Serial1);      // Sensor default Modbus ID is 2
 }
 
 void loop() {
-    Serial.println("Requesting data...");
+  // Read 3 consecutive registers starting from 0x0000
+  uint8_t result = node.readHoldingRegisters(0x0000, 3);
 
-    if (ModbusRTUClient.requestFrom(SENSOR_ADDRESS, INPUT_REGISTERS, 0x0000, 1)) {
-        Serial.print("Received: ");
-        Serial.println(ModbusRTUClient.read());
-    } else {
-        Serial.println("Failed to read from sensor!");
-    }
+  if (result == node.ku8MBSuccess) {
+    uint16_t reg0 = node.getResponseBuffer(0);
 
-    delay(1000);
+    Serial.print("Reg 0x0000 Wind speed): ");
+    Serial.print(reg0);
+    Serial.print(" → ");
+    Serial.print(reg0 / 10.0);
+    Serial.println(" m/s");
+    Serial.println("---");
+
+  } else {
+    Serial.print("Modbus read failed. Error code: ");
+    Serial.println(result);
+  }
+
+  delay(1000);
 }
