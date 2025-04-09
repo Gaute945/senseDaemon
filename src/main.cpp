@@ -1,10 +1,13 @@
 #include <Arduino.h>
 #include <Arduino_MKRENV.h>
 #include <SD.h>
+#include <ModbusMaster.h>
 
 #define RAIN_PIN A0
 #define LED_PIN 4
 #define UV_PIN A3
+
+ModbusMaster node;
 
 const int chipSelect = 4;
 File myFile;
@@ -22,6 +25,9 @@ float uvIndex = 0.0;
 void setup() {
   Serial.begin(9600);
   ENV.begin();
+  
+  Serial1.begin(9600);         // Sensor default is usually 9600
+  node.begin(2, Serial1);      // Sensor default Modbus ID is 2
 
   pinMode(LED_PIN, OUTPUT);
   pinMode(UV_PIN, INPUT);
@@ -70,32 +76,7 @@ void sdLog() {
   } else {
     Serial.println(F("Error opening sensors.csv"));
   }
-}
-
-void printSensors() {
-    Serial.print(F("Temperature = "));
-    Serial.print(temperature);
-    Serial.println(F(" *C"));
-    Serial.print(F("Pressure = "));
-    Serial.print(pressure);
-    Serial.println(F(" hPa"));
-
-    Serial.print("Humidity: ");
-    Serial.print(humidity);
-    Serial.println(F(" %"));
-
-    Serial.print("Rain Sensor Value: ");
-    Serial.println(rainSensor);
-    Serial.print("Is it raining? ");
-    Serial.println(rain);
-
-    Serial.print("UV Reading: ");
-    Serial.println(uvReading);
-    Serial.print("UV Index: ");
-    Serial.println(uvIndex);
-    Serial.print("\n");
-    Serial.print("\n");
-}
+} 
 
 float calculateUVIndex() {
   int rawValue = analogRead(UV_PIN); 
@@ -106,6 +87,24 @@ float calculateUVIndex() {
 }
 
 void loop() {
+  // Read 3 consecutive registers starting from 0x0000
+  uint8_t result = node.readHoldingRegisters(0x0000, 3);
+
+  if (result == node.ku8MBSuccess) {
+    uint16_t reg0 = node.getResponseBuffer(0);
+
+    Serial.print("Reg 0x0000 Wind speed): ");
+    Serial.print(reg0);
+    Serial.print(" → ");
+    Serial.print(reg0 / 10.0);
+    Serial.println(" m/s");
+    Serial.println("---");
+
+  } else {
+    Serial.print("Modbus read failed. Error code: ");
+    Serial.println(result);
+  }
+  
   // rain sensor
   rainSensor = analogRead(RAIN_PIN);
   rain = (rainSensor < 1000);
@@ -121,5 +120,6 @@ void loop() {
 
   printSensors();  
   sdLog();
+  
   delay(1000);
 }
