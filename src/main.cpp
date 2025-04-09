@@ -1,9 +1,13 @@
 #include <Arduino.h>
 #include <Arduino_MKRENV.h>
+#include <SD.h>
 
 #define RAIN_PIN A0
 #define LED_PIN 4
 #define UV_PIN A3
+
+const int chipSelect = 4;
+File myFile;
 
 float temperature = 0.0;
 float pressure = 0.0;
@@ -22,6 +26,50 @@ void setup() {
   pinMode(LED_PIN, OUTPUT);
   pinMode(UV_PIN, INPUT);
   pinMode(RAIN_PIN, INPUT);
+
+  if (SD.begin(chipSelect)) {
+    // Clear the csv file
+    myFile = SD.open("sensors.csv", FILE_WRITE);
+    if (myFile) {
+      myFile.close();
+    }
+  } else {
+    Serial.println(F("SD card initialization failed!"));
+  }
+}
+
+void sdLog() {
+  myFile = SD.open("sensors.csv", FILE_WRITE);
+  if (myFile) {
+    // Write CSV header if file is empty
+    if (myFile.size() == 0) {
+      myFile.println("Timestamp,Temperature,Pressure,Humidity,RainSensor,Rain,UVReading,UVIndex");
+    }
+
+    // Write timestamp
+    unsigned long timestamp = millis();
+    myFile.print(timestamp);
+    myFile.print(",");
+
+    // Write sensor data in CSV format
+    myFile.print(temperature);
+    myFile.print(",");
+    myFile.print(pressure);
+    myFile.print(",");
+    myFile.print(humidity);
+    myFile.print(",");
+    myFile.print(rainSensor);
+    myFile.print(",");
+    myFile.print(rain ? "true" : "false");
+    myFile.print(",");
+    myFile.print(uvReading);
+    myFile.print(",");
+    myFile.println(uvIndex);
+
+    myFile.close();
+  } else {
+    Serial.println(F("Error opening sensors.csv"));
+  }
 }
 
 void printSensors() {
@@ -72,5 +120,6 @@ void loop() {
   uvIndex = calculateUVIndex(); // Update UV index
 
   printSensors();  
+  sdLog();
   delay(1000);
 }
