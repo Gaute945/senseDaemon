@@ -76,7 +76,32 @@ void sdLog() {
   } else {
     Serial.println(F("Error opening sensors.csv"));
   }
-} 
+}
+
+void printSensors() {
+  Serial.print(F("Temperature = "));
+  Serial.print(temperature);
+  Serial.println(F(" *C"));
+  Serial.print(F("Pressure = "));
+  Serial.print(pressure);
+  Serial.println(F(" hPa"));
+
+  Serial.print("Humidity: ");
+  Serial.print(humidity);
+  Serial.println(F(" %"));
+
+  Serial.print("Rain Sensor Value: ");
+  Serial.println(rainSensor);
+  Serial.print("Is it raining? ");
+  Serial.println(rain);
+
+  Serial.print("UV Reading: ");
+  Serial.println(uvReading);
+  Serial.print("UV Index: ");
+  Serial.println(uvIndex);
+  Serial.print("\n");
+  Serial.print("\n");
+}
 
 float calculateUVIndex() {
   int rawValue = analogRead(UV_PIN); 
